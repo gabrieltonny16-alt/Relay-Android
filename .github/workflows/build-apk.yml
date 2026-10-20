@@ -1,9 +1,9 @@
-name: Build Relay Android APK
+name: Build OmniBlast OS Android APK
 
 on:
   workflow_dispatch:
   push:
-    branches: [ "main" ]
+    branches: [ "dev/omniblast-os-stage-1" ]
 
 jobs:
   build:
@@ -23,6 +23,6 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: Relay-debug-apk
+          name: OmniBlast-OS-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
