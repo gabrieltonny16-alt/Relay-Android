@@ -3,14 +3,14 @@ plugins {
     id("org.jetbrains.kotlin.android")
 }
 android {
-    namespace = "com.relay.offline"
+    namespace = "com.omniblast.os"
     compileSdk = 35
     defaultConfig {
-        applicationId = "com.relay.offline"
+        applicationId = "com.omniblast.os"
         minSdk = 24
         targetSdk = 35
         versionCode = 1
-        versionName = "1.0"
+        versionName = "0.1.0"
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
