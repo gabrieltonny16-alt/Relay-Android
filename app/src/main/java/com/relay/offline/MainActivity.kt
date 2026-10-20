@@ -14,9 +14,11 @@ import androidx.activity.ComponentActivity
 class MainActivity : ComponentActivity() {
     private lateinit var webView: WebView
     private var fileChooserCallback: ValueCallback<Array<Uri>>? = null
+    private var pendingExportContent: String? = null
 
     companion object {
         private const val FILE_CHOOSER_REQUEST = 4102
+        private const val EXPORT_CSV_REQUEST = 4103
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -73,6 +75,21 @@ class MainActivity : ComponentActivity() {
     @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == EXPORT_CSV_REQUEST) {
+            val content = pendingExportContent
+            pendingExportContent = null
+            if (resultCode == RESULT_OK && data?.data != null && content != null) {
+                try {
+                    contentResolver.openOutputStream(data.data!!)?.use { stream ->
+                        stream.write(content.toByteArray(Charsets.UTF_8))
+                    } ?: throw IllegalStateException("Unable to open the selected file.")
+                    Toast.makeText(this, "Contacts CSV saved.", Toast.LENGTH_LONG).show()
+                } catch (e: Exception) {
+                    Toast.makeText(this, "Could not save the CSV file.", Toast.LENGTH_LONG).show()
+                }
+            }
+            return
+        }
         if (requestCode != FILE_CHOOSER_REQUEST) return
 
         val callback = fileChooserCallback ?: return
@@ -95,6 +112,24 @@ class MainActivity : ComponentActivity() {
     }
 
     inner class OmniBlastBridge {
+        @JavascriptInterface
+        fun exportCsv(content: String) {
+            runOnUiThread {
+                try {
+                    pendingExportContent = content
+                    val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                        addCategory(Intent.CATEGORY_OPENABLE)
+                        type = "text/csv"
+                        putExtra(Intent.EXTRA_TITLE, "omniblast-contacts.csv")
+                    }
+                    startActivityForResult(intent, EXPORT_CSV_REQUEST)
+                } catch (e: Exception) {
+                    pendingExportContent = null
+                    Toast.makeText(this@MainActivity, "Unable to open the save dialog on this device.", Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+
         @JavascriptInterface
         fun openSmsComposer(number: String, message: String) {
             runOnUiThread {
