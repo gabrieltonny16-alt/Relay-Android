@@ -12,5 +12,5 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = "Relay"
+rootProject.name = "OmniBlast OS"
 include(":app")
